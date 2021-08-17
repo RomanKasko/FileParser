@@ -11,18 +11,17 @@ namespace fs = std::filesystem;
 class FilesSearcher
 {
 private:
-    std::string rootFolderPath;
+    fs::path rootFolderPath;
     std::vector<std::string> filesPaths;
     unsigned int fileCounter = 0;
     std::regex extensions {".*\\.[hc](pp)?"}; // .h .c .cpp .hpp
 
 public:
-    explicit FilesSearcher(const std::string &path);
+    explicit FilesSearcher(const std::filesystem::path &path);
     std::vector<std::string> getFilesPaths();
     unsigned int getFilesCount();
     void printFoundData();
     void collectData();
 };
-
 
 #endif

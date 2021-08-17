@@ -1,6 +1,6 @@
 #include "FilesSearcher.h"
 
-FilesSearcher::FilesSearcher(const std::string &path)
+FilesSearcher::FilesSearcher(const std::filesystem::path &path)
 {
     rootFolderPath = path;
 }

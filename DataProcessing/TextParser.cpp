@@ -1,24 +1,17 @@
 #include "TextParser.h"
 
-LinesCounter TextParser::getResult()
+LinesCounter& TextParser::getResult()
 {
     return counter;
 }
 
 void TextParser::parseFile(const std::string &path)
 {
-    const std::regex lineBlank(R"(\t*\s*)");
-    const std::regex lineComment(R"(\/\/)");
-    const std::regex multCommentStart(R"(\/\*)");
-    const std::regex multCommentEnd(R"(\*\/)");
-    const std::regex codeBeforeMultComment(R"((\\w|\\s|[;,.=()])+(\\/\\*)(\\w|\\s|[;,.=()])+)");// code /*
-    const std::regex codeAfterMultComment(R"((\\w|\\s|[;,.=()])+(\\*\\/)(\\w|\\s|[;,.=()])+)"); // */ code
-    const std::regex codeBeforeLineComment("(\\w|\\s|[(),;.])+\\/\\/(\\w|\\s|[(),;.])*");       // code //
-
+    LinesCounter localCounter;
     std::string line;
     bool isOpenComment = false;
 
-    std::fstream file(path);
+    std::ifstream file(path);
     if(!file)
     {
         std::cerr<<"Can't create file stream";
@@ -27,65 +20,86 @@ void TextParser::parseFile(const std::string &path)
 
     while(getline(file,line))
     {
-        ++counter.allLines;
+        blankLineCount(line,localCounter,isOpenComment);
+        commentCount(line,localCounter,isOpenComment);
+        codeCount(line,localCounter);
+        ++localCounter.allLines;
+    }
 
-        if(std::regex_match(line,lineBlank))
+    file.close();
+    std::lock_guard<std::mutex> lock(mtx);
+    counter += localCounter;
+}
+
+void TextParser::commentCount(const std::string &line, LinesCounter &localCounter, bool &openComment)
+{
+    if(openComment)
+    {
+        if(line.find("*/") != std::string::npos)
         {
-            if(isOpenComment)
-            {
-                ++counter.commentsCounter;
-                continue;
-            }
-            ++counter.blankLinesCounter;
-            continue;
+            codeAfterMultComment(line,localCounter);
+            openComment = false;
         }
-
-        if(isOpenComment)
+        ++localCounter.commentsCounter;
+    }
+    else
+    {
+        if(line.find("//") != std::string::npos)
         {
-            if(std::regex_search(line,multCommentEnd))
-            {
-                if(std::regex_match(line,codeAfterMultComment))
-                {
-                    ++counter.codeLinesCounter;
-                }
-                ++counter.commentsCounter;
-                isOpenComment = false;
-            }
+            codeBeforeLineComment(line,localCounter);
+            ++localCounter.commentsCounter;
         }
-        else
+        else if(line.find("/*") != std::string::npos)
         {
-            if(std::regex_match(line,multCommentStart) )
-            {
-                if(std::regex_match(line,codeBeforeMultComment))
-                {
-                    ++counter.codeLinesCounter;
-                }
-
-                ++counter.commentsCounter;
-                isOpenComment = true;
-
-                if(std::regex_search(line,multCommentEnd))
-                {
-                    if(std::regex_match(line,codeAfterMultComment))
-                    {
-                        ++counter.codeLinesCounter;
-                    }
-                    isOpenComment = false;
-                }
-            }
-            else if(std::regex_search(line,lineComment))
-            {
-                ++counter.commentsCounter;
-                if(std::regex_match(line,codeBeforeLineComment))
-                {
-                    ++counter.codeLinesCounter;
-                }
-                continue;
-            }
-            else
-            {
-                ++counter.codeLinesCounter;
-            }
+            codeBeforeMultComment(line,localCounter);
+            openComment = true;
+            ++localCounter.commentsCounter;
         }
+    }
+}
+
+void TextParser::codeCount(const std::string &line, LinesCounter &localCounter)
+{
+    if(line.find("//") == std::string::npos &&
+       line.find("/*") == std::string::npos &&
+       line.find("*/") == std::string::npos &&
+       !line.empty())
+    {
+        ++localCounter.codeLinesCounter;
+    }
+}
+
+void TextParser::blankLineCount(const std::string &line, LinesCounter &localCounter, bool &openComment)
+{
+    if(!openComment && (line.empty() || line.find_first_not_of(' ') == std::string::npos))
+    {
+        ++localCounter.blankLinesCounter;
+    }
+}
+
+void TextParser::codeBeforeMultComment(const std::string &line,LinesCounter &localCounter)
+{
+    const std::regex codeBeforeMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)+(\/\*)(\w|\s|[;,.=()<>]|\]|\[)*))");  // code /*
+    if(std::regex_match(line,codeBeforeMultComment))
+    {
+        ++localCounter.codeLinesCounter;
+    }
+}
+
+void TextParser::codeAfterMultComment(const std::string &line,LinesCounter &localCounter)
+{
+    const std::regex codeAfterMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)*(\*\/)(\w|\s|[;,.=()<>]|\]|\[)+))");  // */ code
+    if(std::regex_match(line,codeAfterMultComment))
+    {
+        ++localCounter.codeLinesCounter;
+    }
+}
+
+void TextParser::codeBeforeLineComment(const std::string &line,LinesCounter &localCounter)
+{
+    const std::regex codeBeforeLineComment(R"((\w|\s|[(),;.])+\/\/(\w|\s|[(),;.])*)");  // code //
+    if(std::regex_match(line,codeBeforeLineComment))
+    {
+        ++localCounter.codeLinesCounter;
     }
 }

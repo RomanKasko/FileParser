@@ -11,5 +11,4 @@ struct LinesCounter
     void operator+= (const LinesCounter &counter);
 };
 
-
 #endif //FILEPARSER_LINESCOUNTER_H

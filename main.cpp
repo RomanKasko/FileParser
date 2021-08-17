@@ -2,12 +2,12 @@
 #include "DataWriting/StatisticLogger.h"
 #include <chrono>
 
-#include <iostream>
-
-int main()
+int main(int argc, char* argv[])
 {
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    std::string root = "D:\\SoftServe\\FileParser";
+    fs::path root{argc >= 2 ? argv[1] : fs::current_path()};
+
+    start = std::chrono::system_clock::now();
 
     FilesSearcher filesSearcher(root);
     filesSearcher.collectData();
@@ -15,9 +15,7 @@ int main()
 
     StatisticCreator creator(filesSearcher);
 
-    start = std::chrono::system_clock::now();
-
-    LinesCounter linesCounter = creator.analyzeData();
+    LinesCounter linesCounter = creator.createStatistic();
 
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> time = end - start;
