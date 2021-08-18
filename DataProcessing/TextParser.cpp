@@ -79,7 +79,7 @@ void TextParser::blankLineCount(const std::string &line, LinesCounter &localCoun
 
 void TextParser::codeBeforeMultComment(const std::string &line,LinesCounter &localCounter)
 {
-    const std::regex codeBeforeMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)+(\/\*)(\w|\s|[;,.=()<>]|\]|\[)*))");  // code /*
+    const std::regex codeBeforeMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)+(\/\*)(\w|\s|[;,.=()<>]|\]|\[)*))"); /// code /*
     if(std::regex_match(line,codeBeforeMultComment))
     {
         ++localCounter.codeLinesCounter;
@@ -88,7 +88,7 @@ void TextParser::codeBeforeMultComment(const std::string &line,LinesCounter &loc
 
 void TextParser::codeAfterMultComment(const std::string &line,LinesCounter &localCounter)
 {
-    const std::regex codeAfterMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)*(\*\/)(\w|\s|[;,.=()<>]|\]|\[)+))");  // */ code
+    const std::regex codeAfterMultComment(R"(((\w|\s|[;,.=()<>]|\]|\[)*(\*\/)(\w|\s|[;,.=()<>]|\]|\[)+))"); /// */ code
     if(std::regex_match(line,codeAfterMultComment))
     {
         ++localCounter.codeLinesCounter;
@@ -97,7 +97,7 @@ void TextParser::codeAfterMultComment(const std::string &line,LinesCounter &loca
 
 void TextParser::codeBeforeLineComment(const std::string &line,LinesCounter &localCounter)
 {
-    const std::regex codeBeforeLineComment(R"((\w|\s|[(),;.])+\/\/(\w|\s|[(),;.])*)");  // code //
+    const std::regex codeBeforeLineComment(R"((\w|\s|[(),;.])+\/\/(\w|\s|[(),;.])*)"); /// code //
     if(std::regex_match(line,codeBeforeLineComment))
     {
         ++localCounter.codeLinesCounter;

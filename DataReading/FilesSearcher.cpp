@@ -25,13 +25,25 @@ void FilesSearcher::collectData()
 
     for(auto& curPath : fs::recursive_directory_iterator(rootFolderPath))
     {
-        if(fs::is_regular_file(curPath) &&
-          std::regex_match(curPath.path().string(),extensions))
+        if(fs::is_regular_file(curPath) && isAllowedExtensions(curPath.path().extension().string()))
         {
             filesPaths.push_back(curPath.path().string());
         }
     }
     fileCounter = filesPaths.size();
+}
+
+bool FilesSearcher::isAllowedExtensions(const std::string &ext)
+{
+    std::vector<std::string> extensions = {".c",".cpp",".h",".hpp"};
+    for(auto &it : extensions)
+    {
+        if(it == ext)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void FilesSearcher::printFoundData()

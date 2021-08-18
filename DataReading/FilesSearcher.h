@@ -14,7 +14,7 @@ private:
     fs::path rootFolderPath;
     std::vector<std::string> filesPaths;
     unsigned int fileCounter = 0;
-    std::regex extensions {".*\\.[hc](pp)?"}; // .h .c .cpp .hpp
+    bool isAllowedExtensions(const std::string &extension);
 
 public:
     explicit FilesSearcher(const std::filesystem::path &path);
