@@ -11,11 +11,9 @@ int main(int argc, char* argv[])
 
     FilesSearcher filesSearcher(root);
     filesSearcher.collectData();
-    filesSearcher.printFoundData();
 
-    StatisticCreator creator(filesSearcher);
-
-    LinesCounter linesCounter = creator.createStatistic();
+    StatisticCreator creator;
+    LinesCounter linesCounter = creator.createStatistic(filesSearcher);
 
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> time = end - start;

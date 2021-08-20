@@ -18,6 +18,8 @@ void TextFileStatisticLogger::writeStatistic(const Statistic &stat)
             << " Code lines:      " << stat.counter.codeLinesCounter << std::endl
             << " Comment lines:   " << stat.counter.commentsCounter << std::endl
             << " All lines:       " << stat.counter.allLines << std::endl;
+
+    outData.close();
 }
 
 void TextFileStatisticLogger::printStatistic(const Statistic &stat)

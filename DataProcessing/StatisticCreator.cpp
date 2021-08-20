@@ -1,21 +1,17 @@
 #include "StatisticCreator.h"
 
-StatisticCreator::StatisticCreator(FilesSearcher &files)
-{
-    filesPaths = files.getFilesPaths();
-}
-
-LinesCounter& StatisticCreator::createStatistic()
+LinesCounter& StatisticCreator::createStatistic(FilesSearcher &files)
 {
     TextParser parser;
+    std::vector<std::string> filesPaths = files.getFilesPaths();
 
-    boost::asio::thread_pool pool(std::thread::hardware_concurrency());
+    boost::asio::thread_pool pool(std::thread::hardware_concurrency()); // pool with supported threads by implementation
     for(auto& path : filesPaths)
     {
         boost::asio::post(pool,[ObjectPtr = &parser, &path]{ ObjectPtr->parseFile(path); });
     }
-    pool.wait();
+    pool.join();
 
-    linesCounter = parser.getResult();
-    return linesCounter;
+    linesCounter = &parser.getResult();
+    return *linesCounter;
 }

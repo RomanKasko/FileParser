@@ -9,12 +9,10 @@
 class StatisticCreator
 {
 private:
-    std::vector<std::string> filesPaths;
-    LinesCounter linesCounter;
+    LinesCounter *linesCounter;
 
 public:
-    explicit StatisticCreator(FilesSearcher &files);
-    LinesCounter& createStatistic();
+    LinesCounter& createStatistic(FilesSearcher &files);
 };
 
 #endif //FILEPARSER_STATISTICCREATOR_H

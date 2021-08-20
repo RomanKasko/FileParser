@@ -14,10 +14,11 @@ private:
     fs::path rootFolderPath;
     std::vector<std::string> filesPaths;
     unsigned int fileCounter = 0;
+
     bool isAllowedExtensions(const std::string &extension);
 
 public:
-    explicit FilesSearcher(const std::filesystem::path &path);
+    explicit FilesSearcher(const fs::path &path);
     std::vector<std::string> getFilesPaths();
     unsigned int getFilesCount();
     void printFoundData();
